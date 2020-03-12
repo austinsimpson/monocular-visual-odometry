@@ -6,6 +6,9 @@
 
 #include <QString>
 
+using namespace cv;
+using namespace std;
+
 const int kMaxFeatures = 3000;
 static Ptr<ORB> globalOrb = ORB::create(kMaxFeatures);
 

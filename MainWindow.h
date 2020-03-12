@@ -4,7 +4,7 @@
 #include "ui_MainWindow.h"
 
 #include "Frame.h"
-#include "framecorrespondence.h"
+#include "FrameCorrespondence.h"
 
 #include <opencv2/videoio.hpp>
 
@@ -14,8 +14,6 @@
 #include <QVector3D>
 #include <Qt3DWindow>
 #include <QEntity>
-
-using namespace cv;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -49,7 +47,7 @@ private:
 	int _currentFrameIndex;
 	int _numberOfFrames;
 
-	VideoCapture _videoCapture;
+    cv::VideoCapture _videoCapture;
 	QFile _trainSpeedsFile;
 	QFile _trainToObservedFile;
 };

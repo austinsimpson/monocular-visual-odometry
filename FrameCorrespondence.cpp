@@ -3,7 +3,10 @@
 #include <opencv2/features2d.hpp>
 #include <opencv2/calib3d.hpp>
 
+#include <iostream>
+
 using namespace cv;
+using namespace std;
 
 const float kLoweRatioThreshold = 0.75f;
 const float kSlopeThreshold = 0.4f;
@@ -91,7 +94,6 @@ vector<DMatch> FrameCorrespondence::findGoodMatches
 	return goodMatches;
 }
 
-
 void FrameCorrespondence::extrapolateMatrices()
 {
 	vector<Point> firstPoints;
@@ -111,13 +113,24 @@ void FrameCorrespondence::extrapolateMatrices()
 
 	if (firstPoints.size() > 14)
 	{
+        cv::Mat inliers;
 		_fundamentalMatrix = findFundamentalMat(secondPoints, firstPoints, FM_RANSAC, 3, 0.99);
-		_essentialMatrix = findEssentialMat(secondPoints, firstPoints, 1.0, Point2d(0.0, 0.0), RANSAC, 0.999, 1.0, noArray());
-		recoverPose(_essentialMatrix, secondPoints, firstPoints, Mat::eye(3, 3, CV_64F), _rotation, _translation);
-		cv::tria
+        _essentialMatrix = findEssentialMat(secondPoints, firstPoints, 1.0, Point2d(0.0, 0.0), RANSAC, 0.999, 1.0, inliers);
+        cv::recoverPose(_essentialMatrix, secondPoints, firstPoints, Mat::eye(3, 3, CV_64F), _rotation, _translation, inliers);
+
+
+        Mat firstProjectionMatrix;
+        cv::hconcat(Mat::eye(3, 3, CV_64F), Mat::zeros(3, 1, CV_64F), firstProjectionMatrix);
+
+        Mat secondProjectionMatrix;
+        cv::hconcat(_rotation, _translation, secondProjectionMatrix);
+
+        _coords4d = Mat::zeros(4, firstPoints.size(), CV_64F);
+        cv::triangulatePoints(firstProjectionMatrix, secondProjectionMatrix, firstPoints, secondPoints, _coords4d);
 	}
-	else
+    else
 	{
+
 		_rotation = Mat::eye(3, 3, CV_64F);
 		_translation = Mat::zeros(3, 1, CV_64F);
 	}

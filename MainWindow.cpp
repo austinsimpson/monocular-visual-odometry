@@ -3,7 +3,9 @@
 #include "Utilities.h"
 
 #include "Frame.h"
-#include "framecorrespondence.h"
+#include "FrameCorrespondence.h"
+
+#include <QDir>
 
 #include <opencv2/videoio.hpp>
 #include <iostream>
@@ -24,15 +26,17 @@ MainWindow::MainWindow
 	_currentFrameIndex(0),
 	_numberOfFrames(0),
 	_trainSpeedsFile(":/data/train.txt"),
-	_trainToObservedFile("/Users/AustinSimpson/trainandobservations.csv")
+    _trainToObservedFile("trainandobservations.csv")
 {
 	setupUi(this);
 
-	loadVideo("train.mp4");
+    QString videoPath = QCoreApplication::applicationDirPath() + "/train.mp4";
+    loadVideo(videoPath);
 	build3dScene();
 
 	_timer.setInterval(50);
-	connect(&_timer, &QTimer::timeout, [this](){
+    connect(&_timer, &QTimer::timeout, [this]()
+    {
 		processNextFrame();
 		if (1 < _currentFrameIndex && _currentFrameIndex <= _frames.size() )
 		{
@@ -94,7 +98,6 @@ void MainWindow::build3dScene()
 	yAxisEntity->addComponent(cylinderMesh);
 	yAxisEntity->addComponent(yAxisTransform);
 
-
 	_3dWindow->setRootEntity(_rootEntity);
 	_3dWindow->show();
 }
@@ -135,25 +138,32 @@ void MainWindow::loadVideo
 	_translationByFrame.append(QVector3D(0, 0, 0));
 
 	_videoCapture = VideoCapture(path.toStdString(), CAP_ANY);
-	//_videoCapture = VideoCapture(0);
-	_numberOfFrames = static_cast<int>(_videoCapture.get(CAP_PROP_FRAME_COUNT));
+    if (_videoCapture.isOpened())
+    {
+        //_videoCapture = VideoCapture(0);
+        _numberOfFrames = static_cast<int>(_videoCapture.get(CAP_PROP_FRAME_COUNT));
 
-	_trainSpeedsFile.open(QIODevice::ReadOnly);
-	if (!_trainToObservedFile.open(QFile::WriteOnly | QFile::Text))
-		cout << "Failed to open obs file" << endl;
+        _trainSpeedsFile.open(QIODevice::ReadOnly);
+        if (!_trainToObservedFile.open(QFile::WriteOnly | QFile::Text))
+        {
+            cout << "Failed to open obs file" << endl;
+        }
+        else
+        {
+            cout << "Failed to open video." << endl;
+        }
+    }
 }
 
 void MainWindow::processNextFrame()
 {
 	Mat cvFrame;
-	_videoCapture >> cvFrame;
-	cout << "Processing frame: " << _currentFrameIndex << endl;
+    _videoCapture >> cvFrame;
 	if (cvFrame.empty() == false)
 	{
-		Frame frame;
-		cout << "Width: " << cvFrame.cols << " Height: " << cvFrame.rows << endl;
+        Frame frame;
 		frame.extractFeatures(cvFrame);
-		frame.setRecordedSpeed(_trainSpeedsFile.readLine().toFloat());
+        frame.setRecordedSpeed(_trainSpeedsFile.readLine().toFloat());
 		_frames.append(frame);
 
 		if (_frames.count() > 1)
@@ -165,10 +175,10 @@ void MainWindow::processNextFrame()
 			QVector3D translation = matToVector(correspondence.rotation() * correspondence.translation());
 			_translationByFrame.append(_translationByFrame.last() + translation);
 
-			float worldTravelDistance = sqrt((_translationByFrame.end() - 2)->distanceToPoint(*(_translationByFrame.end() - 1)));
-			_frames[_frames.count() - 2].setObservedSpeed(worldTravelDistance);
-			_correspondences.append(correspondence);
-			_trainToObservedFile.write(QString("%1, %2\n").arg(_frames[_frames.count() - 2].recordedSpeed()).arg(_frames[_frames.count() - 2].observedSpeed()).toLatin1());
+            float worldTravelDistance = sqrt((_translationByFrame.end() - 2)->distanceToPoint(*(_translationByFrame.end() - 1)));
+            _frames[_frames.count() - 2].setObservedSpeed(worldTravelDistance);
+            _correspondences.append(correspondence);
+            _trainToObservedFile.write(QString("%1, %2\n").arg(_frames[_frames.count() - 2].recordedSpeed()).arg(_frames[_frames.count() - 2].observedSpeed()).toLatin1());
 		}
 
 		_currentFrameIndex++;

@@ -29,9 +29,10 @@ RESOURCES += \
     Resources.qrc
 
 macx: LIBS += -L$$PWD/../../../../usr/local/Cellar/opencv/4.2.0_3/lib/ -lopencv_core.4.2.0 -lopencv_videoio.4.2.0 -lopencv_highgui.4.2.0 -lopencv_features2d.4.2.0 -lopencv_calib3d.4.2.0 -lopencv_imgproc.4.2.0
+macx: INCLUDEPATH += $$PWD/../../../../usr/local/Cellar/opencv/4.2.0_3/include/opencv4
+macx: DEPENDPATH += $$PWD/../../../../usr/local/Cellar/opencv/4.2.0_3/include/opencv4
 
-INCLUDEPATH += $$PWD/../../../../usr/local/Cellar/opencv/4.2.0_3/include/opencv4
-DEPENDPATH += $$PWD/../../../../usr/local/Cellar/opencv/4.2.0_3/include/opencv4
+
 
 HEADERS += \
     Frame.h \
@@ -42,3 +43,9 @@ HEADERS += \
 
 FORMS += \
     MainWindow.ui
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../../../opencv/build/x64/vc15/lib/ -lopencv_world420
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../../../opencv/build/x64/vc15/lib/ -lopencv_world420d
+
+win32: INCLUDEPATH += C:/opencv/build/include
+win32: DEPENDPATH += C:/opencv/build/include

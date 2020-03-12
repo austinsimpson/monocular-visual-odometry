@@ -1,11 +1,7 @@
 #ifndef FRAME_H
 #define FRAME_H
 
-
 #include <opencv2/core.hpp>
-
-using namespace cv;
-using namespace std;
 
 class Frame
 {
@@ -20,25 +16,25 @@ public:
 	Frame(const Frame& other);
 	Frame& operator=(const Frame& other);
 
-	const Mat& descriptors() const;
+    const cv::Mat& descriptors() const;
 
-	void extractFeatures(const Mat& image, KeyPointDetectionMethod method = KeyPointDetectionMethod::ORBMethod);
+    void extractFeatures(const cv::Mat& image, KeyPointDetectionMethod method = KeyPointDetectionMethod::ORBMethod);
 	void setRecordedSpeed(float recordedSpeed);
 	void setObservedSpeed(float observedSpeed);
 
 	float recordedSpeed() const;
 	float observedSpeed() const;
 
-	const vector<KeyPoint>& extractedFeatures() const;
+    const std::vector<cv::KeyPoint>& extractedFeatures() const;
 
 private:
-	void useOrb(const Mat& img);
-	void useCvGoodFeatures(const Mat& img);
+    void useOrb(const cv::Mat& img);
+    void useCvGoodFeatures(const cv::Mat& img);
 
-	vector<Point> _corners;
+    std::vector<cv::Point> _corners;
 
-	vector<KeyPoint> _extractedFeatures;
-	Mat _descriptors;
+    std::vector<cv::KeyPoint> _extractedFeatures;
+    cv::Mat _descriptors;
 
 	float _recordedSpeed;
 	float _observedSpeed;

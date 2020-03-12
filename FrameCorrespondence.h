@@ -5,8 +5,6 @@
 
 #include "Frame.h"
 
-using namespace cv;
-
 class FrameCorrespondence
 {
 public:
@@ -15,10 +13,10 @@ public:
 	FrameCorrespondence& operator=(const FrameCorrespondence& other);
 
 	bool isValid() const;
-	const vector<DMatch>& goodMatches() const;
+    const std::vector<cv::DMatch>& goodMatches() const;
 
-	Mat rotation() const;
-	Mat translation() const;
+    cv::Mat rotation() const;
+    cv::Mat translation() const;
 
 	void findMatches(const Frame& first, const Frame& second, int neighborCount = 2);
 	void extrapolateMatrices();
@@ -27,15 +25,17 @@ private:
 	const Frame* _firstFrame;
 	const Frame* _secondFrame;
 
-	vector<DMatch> findGoodMatches(const vector<vector<DMatch>>& allMatches);
-	vector<DMatch> _goodMatches;
+    std::vector<cv::DMatch> findGoodMatches(const std::vector<std::vector<cv::DMatch>>& allMatches);
+    std::vector<cv::DMatch> _goodMatches;
 
-	bool isSlopeAppropriate(const Point& p1, const Point& p2);
+    bool isSlopeAppropriate(const cv::Point& p1, const cv::Point& p2);
 
-	Mat _fundamentalMatrix;
-	Mat _essentialMatrix;
-	Mat _rotation;
-	Mat _translation;
+    cv::Mat _coords4d;
+
+    cv::Mat _fundamentalMatrix;
+    cv::Mat _essentialMatrix;
+    cv::Mat _rotation;
+    cv::Mat _translation;
 };
 
 #endif // FRAMECORRESPONDENCE_H
