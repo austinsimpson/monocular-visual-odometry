@@ -34,16 +34,22 @@ MainWindow::MainWindow
     loadVideo(videoPath);
 	build3dScene();
 
-	_timer.setInterval(50);
+	/*
+    processNextFrame();
+    processNextFrame();
+    _frameComparisonWidget->setFrames(&_frames[0], &_frames[1], &_correspondences[0]);
+    addTrackedCameraPoint(_translationByFrame[0]);
+	*/
+    _timer.setInterval(50);
     connect(&_timer, &QTimer::timeout, [this]()
     {
-		processNextFrame();
-		if (1 < _currentFrameIndex && _currentFrameIndex <= _frames.size() )
-		{
-			_frameComparisonWidget->setFrames(&_frames[_currentFrameIndex - 2], &_frames[_currentFrameIndex - 1], &_correspondences[_currentFrameIndex - 2]);
-			addTrackedCameraPoint(_translationByFrame[_currentFrameIndex - 1]);
-		}
-	});
+        processNextFrame();
+        if (1 < _currentFrameIndex && _currentFrameIndex <= _frames.size() )
+        {
+            _frameComparisonWidget->setFrames(&_frames[_currentFrameIndex - 2], &_frames[_currentFrameIndex - 1], &_correspondences[_currentFrameIndex - 2]);
+            addTrackedCameraPoint(_translationByFrame[_currentFrameIndex - 1]);
+        }
+    });
 	_timer.start();
 }
 
@@ -67,7 +73,7 @@ void MainWindow::build3dScene()
 	light->setColor("white");
 	light->setIntensity(1);
 	lightEntity->addComponent(light);
-	Qt3DCore::QTransform *lightTransform = new Qt3DCore::QTransform(lightEntity);
+    Qt3DCore::QTransform* lightTransform = new Qt3DCore::QTransform(lightEntity);
 	lightTransform->setTranslation(cameraEntity->position());
 	lightEntity->addComponent(lightTransform);
 
@@ -75,28 +81,28 @@ void MainWindow::build3dScene()
 	Qt3DExtras::QFirstPersonCameraController *camController = new Qt3DExtras::QFirstPersonCameraController(_rootEntity);
 	camController->setCamera(cameraEntity);
 
-	Qt3DCore::QEntity* xAxisEntity = new Qt3DCore::QEntity(_rootEntity);
-	Qt3DExtras::QCylinderMesh* cylinderMesh = new Qt3DExtras::QCylinderMesh();
+//Qt3DCore::QEntity* xAxisEntity = new Qt3DCore::QEntity(_rootEntity);
+//Qt3DExtras::QCylinderMesh* cylinderMesh = new Qt3DExtras::QCylinderMesh();
 
-	Qt3DCore::QTransform* xAxisTransform = new Qt3DCore::QTransform();
-	xAxisTransform->setTranslation(QVector3D(1.0, 0.0f, 0.0f));
+//Qt3DCore::QTransform* xAxisTransform = new Qt3DCore::QTransform();
+//xAxisTransform->setTranslation(QVector3D(1.0, 0.0f, 0.0f));
 
-	Qt3DExtras::QPhongMaterial* xAxisMaterial = new Qt3DExtras::QPhongMaterial();
-	xAxisMaterial->setDiffuse(QColor(255, 0, 0));
-	xAxisEntity->addComponent(xAxisMaterial);
-	xAxisEntity->addComponent(cylinderMesh);
-	xAxisEntity->addComponent(xAxisTransform);
+//Qt3DExtras::QPhongMaterial* xAxisMaterial = new Qt3DExtras::QPhongMaterial();
+//xAxisMaterial->setDiffuse(QColor(255, 0, 0));
+//xAxisEntity->addComponent(xAxisMaterial);
+//xAxisEntity->addComponent(cylinderMesh);
+//xAxisEntity->addComponent(xAxisTransform);
 
 
-	Qt3DCore::QEntity* yAxisEntity = new Qt3DCore::QEntity(_rootEntity);
-	Qt3DCore::QTransform* yAxisTransform = new Qt3DCore::QTransform();
-	yAxisTransform->setTranslation(QVector3D(0.0, 1.0, 0.0f));
+//	Qt3DCore::QEntity* yAxisEntity = new Qt3DCore::QEntity(_rootEntity);
+//	Qt3DCore::QTransform* yAxisTransform = new Qt3DCore::QTransform();
+//	yAxisTransform->setTranslation(QVector3D(0.0, 1.0, 0.0f));
 
-	Qt3DExtras::QPhongMaterial* yAxisMaterial = new Qt3DExtras::QPhongMaterial();
-	yAxisMaterial->setDiffuse(QColor(0, 255, 0));
-	yAxisEntity->addComponent(yAxisMaterial);
-	yAxisEntity->addComponent(cylinderMesh);
-	yAxisEntity->addComponent(yAxisTransform);
+//	Qt3DExtras::QPhongMaterial* yAxisMaterial = new Qt3DExtras::QPhongMaterial();
+//	yAxisMaterial->setDiffuse(QColor(0, 255, 0));
+//	yAxisEntity->addComponent(yAxisMaterial);
+//	yAxisEntity->addComponent(cylinderMesh);
+//	yAxisEntity->addComponent(yAxisTransform);
 
 	_3dWindow->setRootEntity(_rootEntity);
 	_3dWindow->show();
@@ -125,6 +131,31 @@ void MainWindow::addTrackedCameraPoint
 	sphereEntity->addComponent(sphereMesh);
 	sphereEntity->addComponent(sphereTransform);
 	sphereEntity->addComponent(sphereMaterial);
+}
+
+void MainWindow::addTrackedWorldPoint
+(
+    const QVector3D& point
+)
+{
+    Qt3DCore::QEntity* sphereEntity = new Qt3DCore::QEntity(_rootEntity);
+
+    Qt3DExtras::QSphereMesh* sphereMesh = new Qt3DExtras::QSphereMesh(_rootEntity);
+    sphereMesh->setRadius(0.1);
+
+    Qt3DCore::QTransform* sphereTransform = new Qt3DCore::QTransform();
+    sphereTransform->setTranslation(point);
+    sphereTransform->setScale(1.0);
+    sphereTransform->setRotationX(0);
+    sphereTransform->setRotationY(0);
+    sphereTransform->setRotationZ(0);
+
+    Qt3DExtras::QPhongMaterial* sphereMaterial = new Qt3DExtras::QPhongMaterial();
+    sphereMaterial->setDiffuse(QColor(255, 0, 0));
+
+    sphereEntity->addComponent(sphereMesh);
+    sphereEntity->addComponent(sphereTransform);
+    sphereEntity->addComponent(sphereMaterial);
 }
 
 void MainWindow::loadVideo
@@ -174,6 +205,11 @@ void MainWindow::processNextFrame()
 
 			QVector3D translation = matToVector(correspondence.rotation() * correspondence.translation());
 			_translationByFrame.append(_translationByFrame.last() + translation);
+
+            for (auto worldPoint : matToVectorList(correspondence.worldCoords()))
+            {
+                addTrackedWorldPoint(worldPoint);
+            }
 
             float worldTravelDistance = sqrt((_translationByFrame.end() - 2)->distanceToPoint(*(_translationByFrame.end() - 1)));
             _frames[_frames.count() - 2].setObservedSpeed(worldTravelDistance);

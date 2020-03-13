@@ -3,3 +3,15 @@
 ################################################################################
 
 /.vs/CommaAi/v16/ipch/AutoPCH
+/debug
+/release/moc_predefs.h.cbt
+/.qmake.stash
+/.vs/CommaAi/v16/TestStore/0
+/.vs/CommaAi/v16
+/CommaAi.pro.user
+/CommaAi.vcxproj.user
+/CommaAi.vcxproj.filters
+/CommaAi.vcxproj
+/trainandobservations.csv
+/CommaAi.sln
+/ui_MainWindow.h

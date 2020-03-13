@@ -18,7 +18,7 @@ public:
 
     const cv::Mat& descriptors() const;
 
-    void extractFeatures(const cv::Mat& image, KeyPointDetectionMethod method = KeyPointDetectionMethod::ORBMethod);
+    void extractFeatures(const cv::Mat& image, KeyPointDetectionMethod method = CvGoodPointsMethod);
 	void setRecordedSpeed(float recordedSpeed);
 	void setObservedSpeed(float observedSpeed);
 

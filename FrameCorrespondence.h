@@ -17,6 +17,7 @@ public:
 
     cv::Mat rotation() const;
     cv::Mat translation() const;
+    cv::Mat worldCoords() const;
 
 	void findMatches(const Frame& first, const Frame& second, int neighborCount = 2);
 	void extrapolateMatrices();
@@ -27,6 +28,7 @@ private:
 
     std::vector<cv::DMatch> findGoodMatches(const std::vector<std::vector<cv::DMatch>>& allMatches);
     std::vector<cv::DMatch> _goodMatches;
+    std::vector<cv::Point3i> _matchColors; //Ugly but whatever
 
     bool isSlopeAppropriate(const cv::Point& p1, const cv::Point& p2);
 

@@ -1,4 +1,5 @@
 #include "FrameCorrespondence.h"
+#include "Utilities.h"
 
 #include <opencv2/features2d.hpp>
 #include <opencv2/calib3d.hpp>
@@ -99,7 +100,7 @@ void FrameCorrespondence::extrapolateMatrices()
 	vector<Point> firstPoints;
 	vector<Point> secondPoints;
 
-	for (auto match: _goodMatches)
+    for (auto match : _goodMatches)
 	{
 		auto firstPoint = _firstFrame->extractedFeatures()[match.queryIdx].pt;
 		auto secondPoint = _secondFrame->extractedFeatures()[match.trainIdx].pt;
@@ -114,10 +115,10 @@ void FrameCorrespondence::extrapolateMatrices()
 	if (firstPoints.size() > 14)
 	{
         cv::Mat inliers;
-		_fundamentalMatrix = findFundamentalMat(secondPoints, firstPoints, FM_RANSAC, 3, 0.99);
-        _essentialMatrix = findEssentialMat(secondPoints, firstPoints, 1.0, Point2d(0.0, 0.0), RANSAC, 0.999, 1.0, inliers);
-        cv::recoverPose(_essentialMatrix, secondPoints, firstPoints, Mat::eye(3, 3, CV_64F), _rotation, _translation, inliers);
-
+        _fundamentalMatrix = findFundamentalMat(firstPoints, secondPoints, FM_RANSAC, 3, 0.99);
+        _essentialMatrix = findEssentialMat(firstPoints, secondPoints, 1.0, Point2d(0.0, 0.0), RANSAC, 0.999, 1.0, inliers);
+		cv::recoverPose(_essentialMatrix, firstPoints, secondPoints, Mat::eye(3, 3, CV_64F), _rotation, _translation, inliers);
+		
 
         Mat firstProjectionMatrix;
         cv::hconcat(Mat::eye(3, 3, CV_64F), Mat::zeros(3, 1, CV_64F), firstProjectionMatrix);
@@ -126,11 +127,14 @@ void FrameCorrespondence::extrapolateMatrices()
         cv::hconcat(_rotation, _translation, secondProjectionMatrix);
 
         _coords4d = Mat::zeros(4, firstPoints.size(), CV_64F);
-        cv::triangulatePoints(firstProjectionMatrix, secondProjectionMatrix, firstPoints, secondPoints, _coords4d);
+        cv::triangulatePoints(firstProjectionMatrix, secondProjectionMatrix, pointVectorToMat(firstPoints), pointVectorToMat(secondPoints), _coords4d);
+
+        cout << "Homogenous 3D points: " <<  _coords4d.size << endl;
+		cout << " First points size: " << firstPoints.size();
+		cout << " Second Points Size: " << secondPoints.size();
 	}
     else
 	{
-
 		_rotation = Mat::eye(3, 3, CV_64F);
 		_translation = Mat::zeros(3, 1, CV_64F);
 	}
@@ -142,7 +146,7 @@ bool FrameCorrespondence::isSlopeAppropriate
 	const Point& p2
 )
 {
-	return p1.x == p2.x ? false : abs((p1.y - p2.y)/(p1.x - p2.x)) < kSlopeThreshold;
+	return p1.x == p2.x ? false : abs((p1.y - p2.y) / (p1.x - p2.x)) < kSlopeThreshold;
 }
 
 Mat FrameCorrespondence::rotation() const
@@ -153,4 +157,9 @@ Mat FrameCorrespondence::rotation() const
 Mat FrameCorrespondence::translation() const
 {
 	return _translation;
+}
+
+Mat FrameCorrespondence::worldCoords() const
+{
+    return _coords4d;
 }

@@ -51,11 +51,11 @@ void FrameComparisonWidget::paintEvent
 	pen.setWidth(5);
 	painter.setPen(pen);
 
-	/*if (_leftFrame != nullptr)
+    if (_leftFrame != nullptr)
 	{
 		for (auto point : _leftFrame->extractedFeatures())
 		{
-			painter.drawEllipse(point.pt.x, point.pt.y, 2, 2);
+            painter.drawEllipse(point.pt.x, point.pt.y, 1, 1);
 		}
 	}
 
@@ -66,9 +66,9 @@ void FrameComparisonWidget::paintEvent
 	{
 		for (auto point : _rightFrame->extractedFeatures())
 		{
-			painter.drawEllipse(point.pt.x, point.pt.y, 2, 2);
+            painter.drawEllipse(point.pt.x, point.pt.y, 1, 1);
 		}
-	}*/
+    }
 
 	if (_correspondence != nullptr && _correspondence->isValid())
 	{
