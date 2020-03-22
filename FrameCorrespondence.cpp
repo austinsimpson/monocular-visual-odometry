@@ -15,7 +15,9 @@ const float kMatchDistanceThreshold = 32.0;
 
 Ptr<DescriptorMatcher> globalMatcher = DescriptorMatcher::create(DescriptorMatcher::BRUTEFORCE_HAMMING);
 
-FrameCorrespondence::FrameCorrespondence()
+FrameCorrespondence::FrameCorrespondence() :
+	_firstFrame(nullptr),
+	_secondFrame(nullptr)
 {
 
 }
@@ -34,6 +36,8 @@ FrameCorrespondence::FrameCorrespondence
 	_firstFrame = other._firstFrame;
 	_secondFrame = other._secondFrame;
 	_goodMatches = other._goodMatches;
+
+	_coords4d = other._coords4d;
 }
 
 FrameCorrespondence& FrameCorrespondence::operator=
@@ -49,6 +53,8 @@ FrameCorrespondence& FrameCorrespondence::operator=
 	_firstFrame = other._firstFrame;
 	_secondFrame = other._secondFrame;
 	_goodMatches = other._goodMatches;
+
+	_coords4d = other._coords4d;
 	return *this;
 }
 
@@ -76,6 +82,18 @@ void FrameCorrespondence::findMatches
 	globalMatcher->knnMatch(first.descriptors(), second.descriptors(), allMatches, neighborCount);
 
 	_goodMatches = findGoodMatches(allMatches);
+
+	allMatches.clear();
+}
+
+const Frame* FrameCorrespondence::firstFrame() const
+{
+	return _firstFrame;
+}
+
+const Frame* FrameCorrespondence::secondFrame() const
+{
+	return _secondFrame;
 }
 
 vector<DMatch> FrameCorrespondence::findGoodMatches
@@ -84,6 +102,8 @@ vector<DMatch> FrameCorrespondence::findGoodMatches
 )
 {
 	vector<DMatch> goodMatches;
+
+	//Lowes test
 	for (size_t i = 0; i < allMatches.size(); i++)
 	{
 		if (allMatches[i][0].distance < kLoweRatioThreshold * allMatches[i][1].distance && allMatches[i][0].distance < kMatchDistanceThreshold)
@@ -105,39 +125,29 @@ void FrameCorrespondence::extrapolateMatrices()
 		auto firstPoint = _firstFrame->extractedFeatures()[match.queryIdx].pt;
 		auto secondPoint = _secondFrame->extractedFeatures()[match.trainIdx].pt;
 
-		if (isSlopeAppropriate(firstPoint, secondPoint))
-		{
-			firstPoints.push_back(firstPoint);
-			secondPoints.push_back(secondPoint);
-		}
+		firstPoints.push_back(firstPoint);
+		secondPoints.push_back(secondPoint);
 	}
 
 	if (firstPoints.size() > 14)
 	{
         cv::Mat inliers;
-        _fundamentalMatrix = findFundamentalMat(firstPoints, secondPoints, FM_RANSAC, 3, 0.99);
-        _essentialMatrix = findEssentialMat(firstPoints, secondPoints, 1.0, Point2d(0.0, 0.0), RANSAC, 0.999, 1.0, inliers);
-		cv::recoverPose(_essentialMatrix, firstPoints, secondPoints, Mat::eye(3, 3, CV_64F), _rotation, _translation, inliers);
-		
+		_coords4d = Mat::zeros(4, firstPoints.size(), CV_64F);
+        _fundamentalMatrix = findFundamentalMat(secondPoints, firstPoints, FM_RANSAC, 3, 0.99);
+        _essentialMatrix = findEssentialMat(secondPoints, firstPoints, 1.0, Point2d(0.0, 0.0), RANSAC, 0.999, 1.0, inliers);
+		cv::recoverPose(_essentialMatrix, secondPoints, firstPoints, Mat::eye(3, 3, CV_64F), _rotation, _translation, 10.0, inliers, _coords4d);
 
-        Mat firstProjectionMatrix;
-        cv::hconcat(Mat::eye(3, 3, CV_64F), Mat::zeros(3, 1, CV_64F), firstProjectionMatrix);
-
-        Mat secondProjectionMatrix;
-        cv::hconcat(_rotation, _translation, secondProjectionMatrix);
-
-        _coords4d = Mat::zeros(4, firstPoints.size(), CV_64F);
-        cv::triangulatePoints(firstProjectionMatrix, secondProjectionMatrix, pointVectorToMat(firstPoints), pointVectorToMat(secondPoints), _coords4d);
-
-        cout << "Homogenous 3D points: " <<  _coords4d.size << endl;
-		cout << " First points size: " << firstPoints.size();
-		cout << " Second Points Size: " << secondPoints.size();
+		cout << "Fundamental matrix: " << _fundamentalMatrix << endl;
+		cout << "Essential Matrix: " << _essentialMatrix << endl;
 	}
     else
 	{
 		_rotation = Mat::eye(3, 3, CV_64F);
 		_translation = Mat::zeros(3, 1, CV_64F);
 	}
+
+	firstPoints.clear();
+	secondPoints.clear();
 }
 
 bool FrameCorrespondence::isSlopeAppropriate

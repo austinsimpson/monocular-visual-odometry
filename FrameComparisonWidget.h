@@ -13,11 +13,9 @@ public:
 
 	virtual void paintEvent(QPaintEvent* event) override;
 
-	void setFrames(Frame* left, Frame* right, FrameCorrespondence* correspondence);
+	void setFrames(FrameCorrespondence* correspondence);
 
 private:
-	Frame* _leftFrame;
-	Frame* _rightFrame;
 	FrameCorrespondence* _correspondence;
 
 	bool _showEpilines;

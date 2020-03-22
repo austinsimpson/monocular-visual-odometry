@@ -27,7 +27,13 @@ public:
 
     const std::vector<cv::KeyPoint>& extractedFeatures() const;
 
+	int width() const;
+	int height() const;
+
 private:
+	int _width;
+	int _height;
+
     void useOrb(const cv::Mat& img);
     void useCvGoodFeatures(const cv::Mat& img);
 

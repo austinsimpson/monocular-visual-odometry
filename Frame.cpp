@@ -13,7 +13,9 @@ const int kMaxFeatures = 3000;
 static Ptr<ORB> globalOrb = ORB::create(kMaxFeatures);
 
 Frame::Frame() :
-	_recordedSpeed(0)
+	_recordedSpeed(0),
+	_width(0),
+	_height(0)
 {
 }
 
@@ -26,6 +28,9 @@ Frame::Frame
 	_extractedFeatures = other._extractedFeatures;
 	_descriptors = other._descriptors;
 	_corners = other._corners;
+
+	_width = other._width;
+	_height = other._height;
 }
 
 Frame& Frame::operator=
@@ -58,6 +63,9 @@ void Frame::extractFeatures
 {
 	if (image.empty())
 		return;
+
+	_width = image.cols;
+	_height = image.rows;
 
 	switch (method)
 	{
@@ -119,4 +127,14 @@ float Frame::observedSpeed() const
 {
 	return _observedSpeed;
 
+}
+
+int Frame::width() const
+{
+	return _width;
+}
+
+int Frame::height() const
+{
+	return _height;
 }

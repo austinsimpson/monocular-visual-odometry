@@ -25,7 +25,7 @@ public:
 private:
 	void build3dScene();
 	void addTrackedCameraPoint(const QVector3D& point);
-    void addTrackedWorldPoint(const QVector3D& point);
+    void addTrackedWorldPoint(const QVector3D& point, QColor pointColor = QColor(0, 255, 0));
 
 	Qt3DExtras::Qt3DWindow* _3dWindow;
 	Qt3DCore::QEntity* _rootEntity;
