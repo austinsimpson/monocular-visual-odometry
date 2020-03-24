@@ -14,7 +14,7 @@ const int kFrameHeight = 480;
 FrameComparisonWidget::FrameComparisonWidget
 (
 	QWidget* parent
-):
+) :
 	QWidget(parent),
 	_correspondence(nullptr)
 {
@@ -27,6 +27,15 @@ void FrameComparisonWidget::setFrames
 )
 {
 	_correspondence = correspondence;
+	update();
+}
+
+void FrameComparisonWidget::setLocationsWithIndices
+(
+	const QVector<QPair<int, QPoint>> locationsWithIndices
+)
+{
+	_locationsWithIndices = locationsWithIndices;
 	update();
 }
 
@@ -47,22 +56,18 @@ void FrameComparisonWidget::paintEvent
 	pen.setWidth(5);
 	painter.setPen(pen);
 
-	if (_correspondence != nullptr && _correspondence->isValid())
+
+	for (auto locationWithIndex : _locationsWithIndices)
 	{
-		for (auto match : _correspondence->goodMatches())
-		{
-			auto firstPoint = _correspondence->firstFrame()->extractedFeatures()[match.queryIdx];
-			auto secondPoint = _correspondence->secondFrame()->extractedFeatures()[match.trainIdx];
+		int pointIndex = locationWithIndex.first;
+		QPoint point = locationWithIndex.second;
 
-			QColor color = colorForPoint(firstPoint.pt, _correspondence->firstFrame()->width(), _correspondence->firstFrame()->height());
-			pen.setColor(color);
-			painter.setPen(pen);
+		QColor color = colorForPoint(point, 640, 480);
+		pen.setColor(color);
+		painter.setPen(pen);
 
-			painter.drawPoint(firstPoint.pt.x, firstPoint.pt.y);
-			painter.drawPoint(secondPoint.pt.x, secondPoint.pt.y);
-
-			painter.drawLine(firstPoint.pt.x, firstPoint.pt.y, secondPoint.pt.x, secondPoint.pt.y);
-		}
+		painter.drawPoint(point);
+		painter.drawText(point, QString::number(pointIndex));
 	}
 
 	painter.end();

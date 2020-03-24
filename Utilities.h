@@ -3,6 +3,7 @@
 
 #include <QColor>
 
+#include <QPoint>
 #include <QVector>
 #include <QVector3D>
 
@@ -57,19 +58,26 @@ inline cv::Mat pointVectorToMat(const std::vector<cv::Point>& points)
     return result;
 }
 
-inline QColor colorForPoint(const cv::Point& point, int width = 0, int height = 0)
+inline QColor colorForPoint(int x, int y, int width = 0, int height = 0)
 {
-    //We're going to do the complex analysis trick where we find the angle of the point and map it to an hsv value;
-    
-    //First we translate to points relative to the center of the image. If we don't do this, all of the points will be in quadrant 1 (x > 0 && y > 0) and thus only have 1/4 of the color spectrum
-    double adjustedX = (point.x - (width / 2));
-    double adjustedY = (point.y - (height / 2));
+    double adjustedX = ((double)x - (width / 2));
+    double adjustedY = ((double)y - (height / 2));
 
     //We do atan2 because it's sensitive to signage.
     double angle = atan2(adjustedY, adjustedX);
     int hue = ((angle + M_PI) / (2 * M_PI)) * 360;
-    
+
     return QColor::fromHsl(hue, 255, 126, 255);
+}
+
+inline QColor colorForPoint(const cv::Point& point, int width = 0, int height = 0)
+{
+    return colorForPoint(point.x, point.y, width, height);
+}
+
+inline QColor colorForPoint(const QPoint& point, int width = 0, int height = 0)
+{
+    return colorForPoint(point.x(), point.y(), width, height);
 }
 
 #endif // UTILITIES_H

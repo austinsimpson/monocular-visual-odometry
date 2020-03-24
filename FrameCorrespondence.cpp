@@ -134,11 +134,7 @@ void FrameCorrespondence::extrapolateMatrices()
         cv::Mat inliers;
 		_coords4d = Mat::zeros(4, firstPoints.size(), CV_64F);
         _fundamentalMatrix = findFundamentalMat(secondPoints, firstPoints, FM_RANSAC, 3, 0.99);
-        _essentialMatrix = findEssentialMat(secondPoints, firstPoints, 1.0, Point2d(0.0, 0.0), RANSAC, 0.999, 1.0, inliers);
-		cv::recoverPose(_essentialMatrix, secondPoints, firstPoints, Mat::eye(3, 3, CV_64F), _rotation, _translation, 10.0, inliers, _coords4d);
-
-		cout << "Fundamental matrix: " << _fundamentalMatrix << endl;
-		cout << "Essential Matrix: " << _essentialMatrix << endl;
+        _essentialMatrix = findEssentialMat(secondPoints, firstPoints, 500.0, Point2d(0.0, 0.0), RANSAC, 0.999, 1.0, inliers);
 	}
     else
 	{

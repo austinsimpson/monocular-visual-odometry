@@ -6,11 +6,8 @@
 
 #include <QString>
 
-using namespace cv;
-using namespace std;
-
 const int kMaxFeatures = 3000;
-static Ptr<ORB> globalOrb = ORB::create(kMaxFeatures);
+static cv::Ptr<cv::ORB> globalOrb = cv::ORB::create(kMaxFeatures);
 
 Frame::Frame() :
 	_recordedSpeed(0),
@@ -27,7 +24,6 @@ Frame::Frame
 	_recordedSpeed = other._recordedSpeed;
 	_extractedFeatures = other._extractedFeatures;
 	_descriptors = other._descriptors;
-	_corners = other._corners;
 
 	_width = other._width;
 	_height = other._height;
@@ -41,23 +37,22 @@ Frame& Frame::operator=
 	_recordedSpeed = other._recordedSpeed;
 	_extractedFeatures = other._extractedFeatures;
 	_descriptors = other._descriptors;
-	_corners = other._corners;
 	return *this;
 }
 
-const Mat& Frame::descriptors() const
+const cv::Mat& Frame::descriptors() const
 {
 	return _descriptors;
 }
 
-const vector<KeyPoint>& Frame::extractedFeatures() const
+const std::vector<cv::KeyPoint>& Frame::extractedFeatures() const
 {
 	return _extractedFeatures;
 }
 
 void Frame::extractFeatures
 (
-	const Mat& image,
+	const cv::Mat& image,
 	KeyPointDetectionMethod method
 )
 {
@@ -80,26 +75,28 @@ void Frame::extractFeatures
 	}
 }
 
-void Frame::useOrb(const Mat& image)
+void Frame::useOrb(const cv::Mat& image)
 {
-	globalOrb->detectAndCompute(image, noArray(), _extractedFeatures, _descriptors, false);
+	globalOrb->detectAndCompute(image, cv::noArray(), _extractedFeatures, _descriptors, false);
 }
 
-void Frame::useCvGoodFeatures(const Mat& image)
+void Frame::useCvGoodFeatures(const cv::Mat& image)
 {
 	_extractedFeatures.clear();
 
-	Ptr<ORB> orb = ORB::create(kMaxFeatures);
-	Mat intermediate = image.clone();
-	cv::cvtColor(intermediate, intermediate, COLOR_BGR2GRAY);
-	cv::goodFeaturesToTrack(intermediate, _corners, kMaxFeatures, 0.01, 7.0);
+	cv::Ptr<cv::ORB> orb = cv::ORB::create(kMaxFeatures);
+	cv::Mat intermediate = image.clone();
+	cv::cvtColor(intermediate, intermediate, cv::COLOR_BGR2GRAY);
 
-	for (Point point : _corners)
+	std::vector<cv::Point> corners;
+	cv::goodFeaturesToTrack(intermediate, corners, kMaxFeatures, 0.01, 7.0);
+
+	for (cv::Point point : corners)
 	{
-		_extractedFeatures.push_back(KeyPoint(point.x, point.y, 20));
+		_extractedFeatures.push_back(cv::KeyPoint(point.x, point.y, 20));
 	}
 
-	globalOrb->compute(image, _extractedFeatures, _descriptors);
+	globalOrb->compute(intermediate, _extractedFeatures, _descriptors);
 }
 
 void Frame::setRecordedSpeed

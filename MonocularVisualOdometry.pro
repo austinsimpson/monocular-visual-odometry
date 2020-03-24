@@ -17,6 +17,8 @@ SOURCES += \
         Frame.cpp \
         FrameComparisonWidget.cpp \
         FrameCorrespondence.cpp \
+        VideoMapper.cpp \
+        TrackedPoint.cpp \
         MainWindow.cpp \
         main.cpp
 
@@ -39,7 +41,9 @@ HEADERS += \
     FrameComparisonWidget.h \
     FrameCorrespondence.h \
     MainWindow.h \
-    Utilities.h
+    TrackedPoint.h \
+    Utilities.h \
+    VideoMapper.h
 
 FORMS += \
     MainWindow.ui

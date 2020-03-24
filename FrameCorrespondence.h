@@ -25,6 +25,7 @@ public:
 	void findMatches(const Frame& first, const Frame& second, int neighborCount = 2);
 	void extrapolateMatrices();
 
+
 private:
 	const Frame* _firstFrame;
 	const Frame* _secondFrame;

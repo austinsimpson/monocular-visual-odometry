@@ -37,8 +37,6 @@ private:
     void useOrb(const cv::Mat& img);
     void useCvGoodFeatures(const cv::Mat& img);
 
-    std::vector<cv::Point> _corners;
-
     std::vector<cv::KeyPoint> _extractedFeatures;
     cv::Mat _descriptors;
 
