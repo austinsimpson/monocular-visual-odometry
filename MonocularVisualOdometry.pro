@@ -17,9 +17,10 @@ SOURCES += \
         Frame.cpp \
         FrameComparisonWidget.cpp \
         FrameCorrespondence.cpp \
-        VideoMapper.cpp \
-        TrackedPoint.cpp \
         MainWindow.cpp \
+        ReconstructionVisualizerWidget.cpp \
+        TrackedPoint.cpp \
+        VideoMapper.cpp \
         main.cpp
 
 # Default rules for deployment.
@@ -41,6 +42,7 @@ HEADERS += \
     FrameComparisonWidget.h \
     FrameCorrespondence.h \
     MainWindow.h \
+    ReconstructionVisualizerWidget.h\
     TrackedPoint.h \
     Utilities.h \
     VideoMapper.h

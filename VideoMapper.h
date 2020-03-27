@@ -33,6 +33,7 @@ public slots:
 signals:
 	void frameProcessed(int frameIndex);
 	void trackedPointsUpdated(QVector<QPair<int, QPoint>> locationsWithIndices);
+	void newPointsFound(const QVector<QVector3D>& points);
 	void processingFinished();
 
 private:

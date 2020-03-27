@@ -23,7 +23,7 @@ inline QVector<QVector3D> matToVectorList(const cv::Mat& mat)
     int column = 0;
     while (column < mat.cols)
     {
-        result.push_back(QVector3D(mat.at<double>(0, column), -mat.at<double>(1, column), mat.at<double>(2, column)));
+        result.push_back(QVector3D(mat.at<double>(0, column), -mat.at<double>(1, column), mat.at<double>(2, column)) / mat.at<double>(3, column));
         ++column;
     }
     return result;

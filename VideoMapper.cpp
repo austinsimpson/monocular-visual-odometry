@@ -80,6 +80,7 @@ void VideoMapper::processNextFrame()
 			correspondence.findMatches(_frames[_frames.count() - 2], _frames[_frames.count() - 1]);
 			correspondence.extrapolateMatrices();
 			_correspondences.append(correspondence);
+			emit newPointsFound(matToVectorList(correspondence.worldCoords()));
 		}
 
 		if (_correspondences.count() > 1)

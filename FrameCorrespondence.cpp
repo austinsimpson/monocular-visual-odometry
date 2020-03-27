@@ -13,6 +13,10 @@ const float kLoweRatioThreshold = 0.75f;
 const float kSlopeThreshold = 0.4f;
 const float kMatchDistanceThreshold = 32.0;
 
+const float kTriangulateThreshold = 10.0;
+
+const double kFocalLength = 500.0;
+
 Ptr<DescriptorMatcher> globalMatcher = DescriptorMatcher::create(DescriptorMatcher::BRUTEFORCE_HAMMING);
 
 FrameCorrespondence::FrameCorrespondence() :
@@ -133,8 +137,16 @@ void FrameCorrespondence::extrapolateMatrices()
 	{
         cv::Mat inliers;
 		_coords4d = Mat::zeros(4, firstPoints.size(), CV_64F);
-        _fundamentalMatrix = findFundamentalMat(secondPoints, firstPoints, FM_RANSAC, 3, 0.99);
-        _essentialMatrix = findEssentialMat(secondPoints, firstPoints, 500.0, Point2d(0.0, 0.0), RANSAC, 0.999, 1.0, inliers);
+        //_fundamentalMatrix = findFundamentalMat(secondPoints, firstPoints, FM_RANSAC, 3, 0.99);
+
+		double centerX = static_cast<double>(_firstFrame->width()) / 2;
+		double centerY = static_cast<double>(_firstFrame->height()) / 2;
+
+        _essentialMatrix = findEssentialMat(secondPoints, firstPoints, kFocalLength, Point2d(centerX, centerY), RANSAC, 0.999, 1.0, inliers);
+
+		Mat cameraMatrix;
+		hconcat(Mat::eye(3, 2, CV_64F) * kFocalLength, Mat(3, 1, CV_64F, { centerX, centerY, 1}), cameraMatrix);
+		cv::recoverPose(_essentialMatrix, secondPoints, firstPoints, cameraMatrix, _rotation, _translation, kTriangulateThreshold, inliers, _coords4d);
 	}
     else
 	{
@@ -165,7 +177,7 @@ Mat FrameCorrespondence::translation() const
 	return _translation;
 }
 
-Mat FrameCorrespondence::worldCoords() const
+const Mat& FrameCorrespondence::worldCoords() const
 {
     return _coords4d;
 }

@@ -11,6 +11,8 @@
 const int kFrameWidth = 640;
 const int kFrameHeight = 480;
 
+const float kFocalLength = 500.0;
+
 FrameComparisonWidget::FrameComparisonWidget
 (
 	QWidget* parent

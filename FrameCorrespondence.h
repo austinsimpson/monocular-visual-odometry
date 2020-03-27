@@ -17,7 +17,7 @@ public:
 
     cv::Mat rotation() const;
     cv::Mat translation() const;
-    cv::Mat worldCoords() const;
+    const cv::Mat& worldCoords() const;
 
     const Frame* firstFrame() const;
     const Frame* secondFrame() const;

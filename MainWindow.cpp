@@ -31,6 +31,7 @@ MainWindow::MainWindow
 	});*/
 
 	connect(_mapper, &VideoMapper::trackedPointsUpdated, _frameComparisonWidget, &FrameComparisonWidget::setLocationsWithIndices);
+	connect(_mapper, &VideoMapper::newPointsFound, _reconstructionVisualizer, &ReconstructionVisualizerWidget::addPoints);
 
 	_mapperThread.start();
 
